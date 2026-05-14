@@ -7,7 +7,7 @@ import Caelestia.Config
 Scope {
     id: root
 
-    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
+    property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
 
     Connections {
         function onOnBatteryChanged(): void {
@@ -17,8 +17,11 @@ Scope {
             } else {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
-                for (const level of root.warnLevels)
-                    level.warned = false;
+                const p = UPower.displayDevice.percentage * 100;
+                for (const level of root.warnLevels) {
+                    if (p > level.level)
+                        level.warned = false;
+                }
             }
         }
 
